@@ -21,5 +21,6 @@ namespace NewsFeedAPI.Data
         }
 
         public DbSet<NewsInstance> NewsInstances { get; set; }
+        public DbSet<UserRate> UserRates { get; set; }
     }
 }

@@ -13,6 +13,7 @@ using System.Web.Http.Results;
 using System.Web.Script.Serialization;
 using NewsFeedAPI.Data;
 using NewsFeedAPI.Models;
+using NewsFeedAPI.UserManager;
 using NewsFeedAPI.ViewModel;
 
 namespace NewsFeedAPI.Contollers
@@ -84,6 +85,8 @@ namespace NewsFeedAPI.Contollers
             }
             return StatusCode(HttpStatusCode.NoContent);
         }
+
+
 
         public IHttpActionResult RateById(int id, int rating)
         {
