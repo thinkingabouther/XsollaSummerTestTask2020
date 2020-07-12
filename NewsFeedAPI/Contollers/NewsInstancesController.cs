@@ -90,12 +90,37 @@ namespace NewsFeedAPI.Contollers
 
         public IHttpActionResult RateById(int id, int rating)
         {
-            NewsInstance newsInstance = db.NewsInstances.Find(id);
-            newsInstance.RateSum += rating;
-            newsInstance.RateCount++;
-            db.Entry(newsInstance).State = EntityState.Modified;
-            db.SaveChanges();
+            IEnumerable<string> values;
+            if (!Request.Headers.TryGetValues("Token", out values))
+            {
+                return BadRequest("Token was not given. Issue a token via api/User/Token and attach it to as a header to your request");
+            }
+            string token = values.FirstOrDefault();
+            if (!RatingManager.TryLogRating(token, id, rating))
+            {
+                return BadRequest("User with this token has already rated that piece of news");
+            }
+
+            NewsInstance newsInstance = RatingManager.RateNews(id, rating);
+            if (newsInstance == null)
+                return NotFound();
             return Ok(newsInstance);
+        }
+
+        public IHttpActionResult CancelRateById(int id)
+        {
+            IEnumerable<string> values;
+            if (!Request.Headers.TryGetValues("Token", out values))
+            {
+                return BadRequest("Token was not given. Use a token that was used to rate this instance");
+            }
+            string token = values.FirstOrDefault();
+            var userRating = RatingManager.IsRateLogged(token, id);
+            if (userRating == null)
+            {
+                return BadRequest("User with given token has not rated the news with given id");
+            }
+            return Ok(RatingManager.CancelRate(userRating));
         }
 
         protected override void Dispose(bool disposing)

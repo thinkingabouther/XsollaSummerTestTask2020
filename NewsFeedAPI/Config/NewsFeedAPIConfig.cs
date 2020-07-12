@@ -24,6 +24,10 @@ namespace NewsFeedAPI.Config
                 name: "RatingRoute",
                 routeTemplate: "api/{controller}/{action}/{id}/{rating}"
             );
+            config.Routes.MapHttpRoute(
+                name: "CancelRatingRoute",
+                routeTemplate: "api/{controller}/{action}/{id}"
+            );
         }
     }
 }

@@ -104,8 +104,9 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\NewsInstance.cs" />
-    <Compile Include="Models\UserRateInfo.cs" />
+    <Compile Include="Models\UserRate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserManager\RatingManager.cs" />
     <Compile Include="UserManager\TokenProvider.cs" />
     <Compile Include="ViewModels\NewsInstanceViewModel.cs" />
   </ItemGroup>
