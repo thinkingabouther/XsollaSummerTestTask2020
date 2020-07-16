@@ -12,6 +12,13 @@ namespace NewsFeedAPI.UserManager
         const int tokenLength = 10;
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         static Random random = new Random();
+
+        /// <summary>
+        /// Method to generate a token based on constant values defined in TokenProvider
+        /// </summary>
+        /// <returns>
+        /// Returns generated token as string value
+        /// </returns>
         public static string GetToken()
         {
             using (var db = new NewsFeedAPIContext())

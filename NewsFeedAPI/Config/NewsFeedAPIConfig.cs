@@ -18,8 +18,6 @@ namespace NewsFeedAPI.Config
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
-
-
             config.Routes.MapHttpRoute(
                 name: "RatingRoute",
                 routeTemplate: "api/{controller}/{action}/{id}/{rating}"

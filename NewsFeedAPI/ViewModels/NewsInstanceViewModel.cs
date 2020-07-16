@@ -15,5 +15,17 @@ namespace NewsFeedAPI.ViewModel
 
         public double Rating { get; set; }
         public string Category { get; set; }
+
+        public static explicit operator NewsInstanceViewModel(NewsInstance newsInstance)
+        {
+            return new NewsInstanceViewModel
+            {
+                ID = newsInstance.ID,
+                Headline = newsInstance.Headline,
+                Content = newsInstance.Content,
+                Rating = newsInstance.RateCount == 0 ? -1 : newsInstance.RateSum / (double)newsInstance.RateCount,
+                Category = newsInstance.Category,
+            };
+        }
     }
 }
