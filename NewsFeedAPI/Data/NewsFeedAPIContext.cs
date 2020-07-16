@@ -7,7 +7,7 @@ using System.Web;
 
 namespace NewsFeedAPI.Data
 {
-    public class NewsFeedAPIContext : DbContext
+    public class NewsFeedAPIContext : DbContext, INewsFeedAPIContext
     {
         // You can add custom code to this file. Changes will not be overwritten.
         // 
@@ -22,5 +22,15 @@ namespace NewsFeedAPI.Data
 
         public DbSet<NewsInstance> NewsInstances { get; set; }
         public DbSet<UserRate> UserRates { get; set; }
+
+        public void MarkAsModified(NewsInstance item)
+        {
+            Entry(item).State = EntityState.Modified;
+        }
+
+        public void MarkAsModified(UserRate item)
+        {
+            Entry(item).State = EntityState.Modified;
+        }
     }
 }

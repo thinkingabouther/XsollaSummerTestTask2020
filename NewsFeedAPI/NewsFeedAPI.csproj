@@ -103,6 +103,7 @@
       <DependentUpon>202007091259181_added user rates.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Data\INewsFeedAPIContext.cs" />
     <Compile Include="Models\NewsInstance.cs" />
     <Compile Include="Models\UserRate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

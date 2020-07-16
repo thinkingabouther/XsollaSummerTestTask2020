@@ -19,10 +19,8 @@ namespace NewsFeedAPI.UserManager
         /// </returns>
         /// <exception cref="UnregistredTokenException">Thrown in case given token was not issued by the system </exception>
         /// <exception cref="RatingOutOfBoundsException">Thrown in case given rate does not fit the range attribute for the property </exception>
-        public static bool TryLogRating(string token, int id, int rating)
+        public static bool TryLogRating(INewsFeedAPIContext db, string token, int id, int rating)
         {
-            using (var db = new NewsFeedAPIContext())
-            { 
                 if ((from userRate in db.UserRates where userRate.Token == token select userRate.Token).Count() < 1) 
                     throw new UnregistredTokenException($"Token {token} is not registred!");
                 var currentUserRates = from userRate in db.UserRates
@@ -46,7 +44,6 @@ namespace NewsFeedAPI.UserManager
                 }
                 return true;
             }
-        }
 
         /// <summary>
         /// Method to add given rating to an instance with given id
@@ -54,20 +51,17 @@ namespace NewsFeedAPI.UserManager
         /// <returns>
         /// Returns an instance with modified rating
         /// </returns>
-        public static NewsInstance RateNews(int id, int rating)
+        public static NewsInstance RateNews(INewsFeedAPIContext db, int id, int rating)
         {
-            using (var db = new NewsFeedAPIContext())
+            NewsInstance newsInstance = db.NewsInstances.Find(id);
+            if (newsInstance != null)
             {
-                NewsInstance newsInstance = db.NewsInstances.Find(id);
-                if (newsInstance != null)
-                {
-                    newsInstance.RateSum += rating;
-                    newsInstance.RateCount++;
-                    db.Entry(newsInstance).State = EntityState.Modified;
-                    db.SaveChanges();
-                }
-                return newsInstance;
+                newsInstance.RateSum += rating;
+                newsInstance.RateCount++;
+                db.MarkAsModified(newsInstance);
+                db.SaveChanges();
             }
+            return newsInstance;
         }
 
         /// <summary>
@@ -76,18 +70,15 @@ namespace NewsFeedAPI.UserManager
         /// <returns>
         /// Returns UserRate instance if there is one. Returns null if the user hasn't rated the instance
         /// </returns>v
-        public static UserRate IsRateLogged(string token, int id)
+        public static UserRate IsRateLogged(INewsFeedAPIContext db, string token, int id)
         {
-            using (var db = new NewsFeedAPIContext())
-            {
-                var currentUserRates = from userRate in db.UserRates
-                                       where userRate.Token == token
-                                       select userRate;
-                var currentRatedNews = from userRate in currentUserRates
-                                       where userRate.NewsInstanceID == id
-                                       select userRate;
-                return currentRatedNews.Count() > 0 ? currentRatedNews.First() : null;
-            }
+            var currentUserRates = from userRate in db.UserRates
+                                    where userRate.Token == token
+                                    select userRate;
+            var currentRatedNews = from userRate in currentUserRates
+                                    where userRate.NewsInstanceID == id
+                                    select userRate;
+            return currentRatedNews.Count() > 0 ? currentRatedNews.First() : null;
         }
 
         /// <summary>
@@ -96,18 +87,15 @@ namespace NewsFeedAPI.UserManager
         /// <returns>
         /// Returns an instance with modified rating
         /// </returns>
-        public static NewsInstance CancelRate(UserRate rate)
+        public static NewsInstance CancelRate(INewsFeedAPIContext db, UserRate rate)
         {
-            using (var db = new NewsFeedAPIContext())
-            {
-                db.UserRates.Remove(db.UserRates.Find(rate.ID));
-                var currentNewsInstance = db.NewsInstances.Find(rate.NewsInstanceID);
-                currentNewsInstance.RateCount--;
-                currentNewsInstance.RateSum -= rate.Rating;
-                db.Entry(currentNewsInstance).State = EntityState.Modified;
-                db.SaveChanges();
-                return currentNewsInstance;
-            }
+            db.UserRates.Remove(db.UserRates.Find(rate.ID));
+            var currentNewsInstance = db.NewsInstances.Find(rate.NewsInstanceID);
+            currentNewsInstance.RateCount--;
+            currentNewsInstance.RateSum -= rate.Rating;
+            db.MarkAsModified(currentNewsInstance);
+            db.SaveChanges();
+            return currentNewsInstance;
         }   
     }
 

@@ -1,4 +1,6 @@
-﻿using NewsFeedAPI.UserManager;
+﻿using NewsFeedAPI.Data;
+using NewsFeedAPI.Models;
+using NewsFeedAPI.UserManager;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +12,20 @@ namespace NewsFeedAPI.Contollers
 {
     public class UserController : ApiController
     {
+        private INewsFeedAPIContext db = new NewsFeedAPIContext();
+
+        public UserController() { }
+
+        public UserController(INewsFeedAPIContext context)
+        {
+            db = context;
+        }
         /// <summary>
         /// Method to send a token for a user
         /// </summary>
-        /// <returns>
-        /// Returns a JSON object with a new token
-        /// </returns>
         public IHttpActionResult GetToken()
         {
-            return Ok(new { Token = TokenProvider.GetToken() });
+            return Ok(TokenProvider.GetToken(db));
         }
     }
 }

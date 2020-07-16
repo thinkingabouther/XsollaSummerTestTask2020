@@ -20,7 +20,15 @@ namespace NewsFeedAPI.Contollers
 {
     public class NewsInstancesController : ApiController
     {
-        private NewsFeedAPIContext db = new NewsFeedAPIContext();
+        private INewsFeedAPIContext db = new NewsFeedAPIContext();
+        public NewsInstancesController()
+        {
+        }
+
+        public NewsInstancesController(INewsFeedAPIContext context)
+        {
+            db = context;
+        }
 
         /// <summary>
         /// Method to return array with all news instances from database.
@@ -37,7 +45,9 @@ namespace NewsFeedAPI.Contollers
             {
                 news.Add((NewsInstanceViewModel)newsInstance);
             }
-            return Ok(new { news = news });
+            var response = Request.CreateResponse(news);
+            response.Headers.Add("Count", news.Count.ToString()) ;
+            return base.ResponseMessage(response);
         }
         /// <summary>
         /// Method to return a particular news instance by id
@@ -99,7 +109,7 @@ namespace NewsFeedAPI.Contollers
                 return BadRequest(ModelState);
             if (id != newsInstance.ID)
                 return BadRequest("ID of modified entity does not correspond with requested ID");
-            db.Entry(newsInstance).State = EntityState.Modified;
+            db.MarkAsModified(newsInstance);
             try
             {
                 db.SaveChanges();
@@ -131,7 +141,7 @@ namespace NewsFeedAPI.Contollers
             bool isNewsRated;
             try
             {
-                isNewsRated = !RatingManager.TryLogRating(token, id, rating);
+                isNewsRated = !RatingManager.TryLogRating(db, token, id, rating);
             }
             catch (UnregistredTokenException e)
             {
@@ -143,7 +153,7 @@ namespace NewsFeedAPI.Contollers
             }
             try
             {
-                NewsInstance newsInstance = RatingManager.RateNews(id, rating);
+                NewsInstance newsInstance = RatingManager.RateNews(db, id, rating);
                 if (newsInstance == null)
                     return NotFound();
                 return Ok((NewsInstanceViewModel)newsInstance);
@@ -170,12 +180,12 @@ namespace NewsFeedAPI.Contollers
                 return BadRequest("Token was not given. Use a token that was used to rate this instance");
             }
             string token = values.FirstOrDefault();
-            var userRating = RatingManager.IsRateLogged(token, id);
+            var userRating = RatingManager.IsRateLogged(db, token, id);
             if (userRating == null)
             {
                 return BadRequest("User with given token has not rated the news with given id");
             }
-            return Ok((NewsInstanceViewModel)RatingManager.CancelRate(userRating));
+            return Ok((NewsInstanceViewModel)RatingManager.CancelRate(db, userRating));
         }
 
         /// <summary>
@@ -199,7 +209,9 @@ namespace NewsFeedAPI.Contollers
             {
                 newsViewModels.Add((NewsInstanceViewModel)newsInstance);
             }
-            return Ok(new { news = newsViewModels });
+            var response = Request.CreateResponse(news);
+            response.Headers.Add("Count", news.Count().ToString());
+            return base.ResponseMessage(response);
 
         }
 
@@ -224,7 +236,9 @@ namespace NewsFeedAPI.Contollers
             {
                 newsViewModels.Add((NewsInstanceViewModel)newsInstance);
             }
-            return Ok(new { news = newsViewModels });
+            var response = Request.CreateResponse(news);
+            response.Headers.Add("Count", news.Count().ToString());
+            return base.ResponseMessage(response);
         }
 
         protected override void Dispose(bool disposing)

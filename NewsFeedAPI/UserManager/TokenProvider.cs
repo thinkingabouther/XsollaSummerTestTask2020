@@ -19,21 +19,19 @@ namespace NewsFeedAPI.UserManager
         /// <returns>
         /// Returns generated token as string value
         /// </returns>
-        public static string GetToken()
+        public static string GetToken(INewsFeedAPIContext db)
         {
-            using (var db = new NewsFeedAPIContext())
+            while (true) 
             {
-                while (true) 
+                var token = new string(Enumerable.Repeat(chars, tokenLength).Select(s => s[random.Next(s.Length)]).ToArray());
+                if ((from userRate in db.UserRates where userRate.Token == token select userRate).Count() == 0)
                 {
-                    var token = new string(Enumerable.Repeat(chars, tokenLength).Select(s => s[random.Next(s.Length)]).ToArray());
-                    if ((from userRate in db.UserRates where userRate.Token == token select userRate).Count() == 0)
-                    {
-                        db.UserRates.Add(new UserRate { Token = token, NewsInstanceID = -1, Rating = -1 });
-                        db.SaveChanges();
-                        return token;
-                    }
+                    db.UserRates.Add(new UserRate { Token = token, NewsInstanceID = -1, Rating = -1 });
+                    db.SaveChanges();
+                    return token;
                 }
             }
         }
+        
     }
 }
