@@ -12,7 +12,7 @@ namespace NewsFeedAPI.Models
         public int ID { get; set; }
         public string Token { get; set; }
         public int NewsInstanceID { get; set; }
-        [Range(0, 5)]
+        [Range(-1, 5)]
         public int Rating { get; set; }
     }
 }
