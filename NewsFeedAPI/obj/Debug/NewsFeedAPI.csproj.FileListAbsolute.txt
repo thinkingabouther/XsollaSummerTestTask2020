@@ -140,5 +140,5 @@ C:\Users\arsenyneustroev\source\repos\XsollaSummer2020BE\NewsFeedAPI\obj\Debug\N
 C:\Users\arsenyneustroev\source\repos\XsollaSummer2020BE\NewsFeedAPI\obj\Debug\NewsFeedAPI.csproj.CopyComplete
 C:\Users\arsenyneustroev\source\repos\XsollaSummer2020BE\NewsFeedAPI\obj\Debug\NewsFeedAPI.dll
 C:\Users\arsenyneustroev\source\repos\XsollaSummer2020BE\NewsFeedAPI\obj\Debug\NewsFeedAPI.pdb
-C:\Users\arsenyneustroev\source\repos\XsollaSummer2020BE\NewsFeedAPI\obj\Debug\NewsFeedAPI.Migrations.addeduserrates.resources
+C:\Users\arsenyneustroev\source\repos\XsollaSummer2020BE\NewsFeedAPI\obj\Debug\NewsFeedAPI.Migrations.Initial.resources
 C:\Users\arsenyneustroev\source\repos\XsollaSummer2020BE\NewsFeedAPI\obj\Debug\NewsFeedAPI.csproj.GenerateResource.cache

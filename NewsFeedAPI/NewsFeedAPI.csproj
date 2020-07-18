@@ -98,9 +98,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202007091259181_added user rates.cs" />
-    <Compile Include="Migrations\202007091259181_added user rates.designer.cs">
-      <DependentUpon>202007091259181_added user rates.cs</DependentUpon>
+    <Compile Include="Migrations\202007162220254_Initial.cs" />
+    <Compile Include="Migrations\202007162220254_Initial.designer.cs">
+      <DependentUpon>202007162220254_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Data\INewsFeedAPIContext.cs" />
@@ -113,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Properties\PublishProfiles\NewsFeedAPI20200717025549 - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -121,8 +122,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202007091259181_added user rates.resx">
-      <DependentUpon>202007091259181_added user rates.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202007162220254_Initial.resx">
+      <DependentUpon>202007162220254_Initial.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

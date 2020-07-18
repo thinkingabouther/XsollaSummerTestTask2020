@@ -87,6 +87,7 @@ namespace NewsFeedAPI.Contollers
         /// <returns>
         /// Returns 404 code if the instance with given ID was not found
         /// </returns>
+        [HttpPost]
         public IHttpActionResult DeleteNewsInstance(int id)
         {
             NewsInstance newsInstance = db.NewsInstances.Find(id);
@@ -199,7 +200,12 @@ namespace NewsFeedAPI.Contollers
         [HttpGet]
         public IHttpActionResult GetTopNewsInstances(double minRating)
         {
-            var news = from newsInstance in db.NewsInstances
+            var newsNoRatingExcluded = new List<NewsInstance>();
+            foreach(var newsInstanceCandidate in db.NewsInstances)
+            {
+                if (newsInstanceCandidate.RateCount != 0) newsNoRatingExcluded.Add(newsInstanceCandidate);
+            }
+            var news = from newsInstance in newsNoRatingExcluded
                        where newsInstance.RateSum / (double)newsInstance.RateCount >= minRating
                        select newsInstance;
             if (news.Count() < 1)
