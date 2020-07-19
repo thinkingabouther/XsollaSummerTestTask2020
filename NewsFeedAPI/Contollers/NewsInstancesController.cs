@@ -87,7 +87,7 @@ namespace NewsFeedAPI.Contollers
         /// <returns>
         /// Returns 404 code if the instance with given ID was not found
         /// </returns>
-        [HttpPost]
+        [HttpDelete]
         public IHttpActionResult DeleteNewsInstance(int id)
         {
             NewsInstance newsInstance = db.NewsInstances.Find(id);
@@ -215,7 +215,7 @@ namespace NewsFeedAPI.Contollers
             {
                 newsViewModels.Add((NewsInstanceViewModel)newsInstance);
             }
-            var response = Request.CreateResponse(news);
+            var response = Request.CreateResponse(newsViewModels);
             response.Headers.Add("Count", news.Count().ToString());
             return base.ResponseMessage(response);
 
@@ -242,7 +242,7 @@ namespace NewsFeedAPI.Contollers
             {
                 newsViewModels.Add((NewsInstanceViewModel)newsInstance);
             }
-            var response = Request.CreateResponse(news);
+            var response = Request.CreateResponse(newsViewModels);
             response.Headers.Add("Count", news.Count().ToString());
             return base.ResponseMessage(response);
         }
