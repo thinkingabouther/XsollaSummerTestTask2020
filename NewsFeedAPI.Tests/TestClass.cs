@@ -136,14 +136,14 @@ namespace NewsFeedAPI.Tests
         public void RateByID_ShouldFailNoToken()
         {
             var context = new MockNewsFeedAPIContext();
-            var controller = new NewsInstancesController(context);
+            var controller = new UserRatingController(context);
             context.NewsInstances.Add(GetNewsInstance());
             var controllerContext = new HttpControllerContext();
             var request = new HttpRequestMessage();
             //request.Headers.Add("Token", "123");
             controllerContext.Request = request;
             controller.ControllerContext = controllerContext;
-            var result = controller.RateById(1, 1);
+            var result = controller.PostUserRating(1, 1);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
             Assert.AreEqual("Token was not given. Issue a token via api/User/Token and attach it to as a header to your request", (result as BadRequestErrorMessageResult).Message);
@@ -153,7 +153,7 @@ namespace NewsFeedAPI.Tests
         public void RateByID_ShouldFailUnregistredToken()
         {
             var context = new MockNewsFeedAPIContext();
-            var controller = new NewsInstancesController(context);
+            var controller = new UserRatingController(context);
             context.NewsInstances.Add(GetNewsInstance());
             var controllerContext = new HttpControllerContext();
             var request = new HttpRequestMessage();
@@ -161,7 +161,7 @@ namespace NewsFeedAPI.Tests
             request.Headers.Add("Token", token);
             controllerContext.Request = request;
             controller.ControllerContext = controllerContext;
-            var result = controller.RateById(1, 1);
+            var result = controller.PostUserRating(1, 1);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
             Assert.AreEqual($"Token {token} is not registred!", (result as BadRequestErrorMessageResult).Message);
@@ -171,7 +171,7 @@ namespace NewsFeedAPI.Tests
         public void RateByID_ShouldFailRepeatedRate()
         {
             var context = new MockNewsFeedAPIContext();
-            var newsController = new NewsInstancesController(context);
+            var newsController = new UserRatingController(context);
             var userContoller = new UserController(context);
             context.NewsInstances.Add(GetNewsInstance());
             var controllerContext = new HttpControllerContext();
@@ -180,8 +180,8 @@ namespace NewsFeedAPI.Tests
             request.Headers.Add("Token", token);
             controllerContext.Request = request;
             newsController.ControllerContext = controllerContext;
-            newsController.RateById(1, 1);
-            var result = newsController.RateById(1, 1);
+            newsController.PostUserRating(1, 1);
+            var result = newsController.PostUserRating(1, 1);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
             Assert.AreEqual($"User with this token has already rated that piece of news", (result as BadRequestErrorMessageResult).Message);
@@ -191,7 +191,7 @@ namespace NewsFeedAPI.Tests
         public void RateByID_ShouldSuccess()
         {
             var context = new MockNewsFeedAPIContext();
-            var newsController = new NewsInstancesController(context);
+            var newsController = new UserRatingController(context);
             var userContoller = new UserController(context);
             context.NewsInstances.Add(GetNewsInstance());
             var controllerContext = new HttpControllerContext();
@@ -200,7 +200,7 @@ namespace NewsFeedAPI.Tests
             request.Headers.Add("Token", token);
             controllerContext.Request = request;
             newsController.ControllerContext = controllerContext;
-            var result = newsController.RateById(1, 1) as OkNegotiatedContentResult<NewsInstanceViewModel>;
+            var result = newsController.PostUserRating(1, 1) as OkNegotiatedContentResult<NewsInstanceViewModel>;
             Assert.IsNotNull(result);
             Assert.AreEqual(2.75, result.Content.Rating);
         }
@@ -209,14 +209,14 @@ namespace NewsFeedAPI.Tests
         public void CancelRateByID_ShouldFailNoToken()
         {
             var context = new MockNewsFeedAPIContext();
-            var controller = new NewsInstancesController(context);
+            var controller = new UserRatingController(context);
             context.NewsInstances.Add(GetNewsInstance());
             var controllerContext = new HttpControllerContext();
             var request = new HttpRequestMessage();
             //request.Headers.Add("Token", "123");
             controllerContext.Request = request;
             controller.ControllerContext = controllerContext;
-            var result = controller.CancelRateById(1);
+            var result = controller.DeleteUserRating(1);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
             Assert.AreEqual("Token was not given. Use a token that was used to rate this instance", (result as BadRequestErrorMessageResult).Message);
@@ -226,7 +226,7 @@ namespace NewsFeedAPI.Tests
         public void CancelRateByID_ShouldSuccess()
         {
             var context = new MockNewsFeedAPIContext();
-            var newsController = new NewsInstancesController(context);
+            var newsController = new UserRatingController(context);
             var userContoller = new UserController(context);
             context.NewsInstances.Add(GetNewsInstance());
             var controllerContext = new HttpControllerContext();
@@ -235,8 +235,8 @@ namespace NewsFeedAPI.Tests
             request.Headers.Add("Token", token);
             controllerContext.Request = request;
             newsController.ControllerContext = controllerContext;
-            newsController.RateById(1, 1);
-            var result = newsController.CancelRateById(1) as OkNegotiatedContentResult<NewsInstanceViewModel>;
+            newsController.PostUserRating(1, 1);
+            var result = newsController.DeleteUserRating(1) as OkNegotiatedContentResult<NewsInstanceViewModel>;
             Assert.IsNotNull(result);
             Assert.AreEqual(10/3d, result.Content.Rating);
         }
@@ -245,7 +245,7 @@ namespace NewsFeedAPI.Tests
         public void CancelRateByID_ShouldFailNotRatedNews()
         {
             var context = new MockNewsFeedAPIContext();
-            var newsController = new NewsInstancesController(context);
+            var newsController = new UserRatingController(context);
             var userContoller = new UserController(context);
             context.NewsInstances.Add(GetNewsInstance());
             var controllerContext = new HttpControllerContext();
@@ -254,7 +254,7 @@ namespace NewsFeedAPI.Tests
             request.Headers.Add("Token", token);
             controllerContext.Request = request;
             newsController.ControllerContext = controllerContext;
-            var result = newsController.CancelRateById(1);
+            var result = newsController.DeleteUserRating(1);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
             Assert.AreEqual("User with given token has not rated the news with given id", (result as BadRequestErrorMessageResult).Message);
@@ -269,7 +269,7 @@ namespace NewsFeedAPI.Tests
             controller.Configuration = new HttpConfiguration();
             context.NewsInstances.Add(GetNewsInstance());
             context.NewsInstances.Add(GetNewsInstance());
-            var result = controller.GetTopNewsInstances(6);
+            var result = controller.GetNewsInstances(6);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
@@ -283,7 +283,7 @@ namespace NewsFeedAPI.Tests
             controller.Configuration = new HttpConfiguration();
             context.NewsInstances.Add(GetNewsInstance());
             context.NewsInstances.Add(GetNewsInstance());
-            ResponseMessageResult result = (ResponseMessageResult)controller.GetTopNewsInstances(3);
+            ResponseMessageResult result = (ResponseMessageResult)controller.GetNewsInstances(3);
             Assert.IsNotNull(result);
             Assert.AreEqual(2, int.Parse(result.Response.Headers.GetValues("Count").FirstOrDefault()));
         }
@@ -297,7 +297,7 @@ namespace NewsFeedAPI.Tests
             controller.Configuration = new HttpConfiguration();
             context.NewsInstances.Add(GetNewsInstance());
             context.NewsInstances.Add(GetNewsInstance());
-            var result = controller.GetNewsInstancesCategory("12");
+            var result = controller.GetNewsInstances("12");
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
@@ -311,7 +311,7 @@ namespace NewsFeedAPI.Tests
             controller.Configuration = new HttpConfiguration();
             context.NewsInstances.Add(GetNewsInstance());
             context.NewsInstances.Add(GetNewsInstance());
-            ResponseMessageResult result = (ResponseMessageResult)controller.GetNewsInstancesCategory("SomeCategory");
+            ResponseMessageResult result = (ResponseMessageResult)controller.GetNewsInstances("SomeCategory");
             Assert.IsNotNull(result);
             Assert.AreEqual(2, int.Parse(result.Response.Headers.GetValues("Count").FirstOrDefault()));
         }

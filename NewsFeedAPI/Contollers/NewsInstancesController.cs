@@ -123,82 +123,14 @@ namespace NewsFeedAPI.Contollers
         }
 
         /// <summary>
-        /// Method to rate an instance by id
-        /// </summary>
-        /// <returns>
-        /// Returns bad request in case of token not given as header/improper token or if user with the given token has already rated the instance
-        /// Returns the modified entity in case the rate was successful
-        /// </returns>
-        [HttpPost]
-        [ResponseType(typeof(NewsInstance))]
-        public IHttpActionResult RateById(int id, int rating)
-        {
-            IEnumerable<string> values;
-            if (!Request.Headers.TryGetValues("Token", out values))
-            {
-                return BadRequest("Token was not given. Issue a token via api/User/Token and attach it to as a header to your request");
-            }
-            string token = values.FirstOrDefault();
-            bool isNewsRated;
-            try
-            {
-                isNewsRated = !RatingManager.TryLogRating(db, token, id, rating);
-            }
-            catch (UnregistredTokenException e)
-            {
-                return BadRequest(e.Message);
-            }
-            if (isNewsRated)
-            {
-                return BadRequest("User with this token has already rated that piece of news");
-            }
-            try
-            {
-                NewsInstance newsInstance = RatingManager.RateNews(db, id, rating);
-                if (newsInstance == null)
-                    return NotFound();
-                return Ok((NewsInstanceViewModel)newsInstance);
-            }
-            catch(RatingOutOfBoundsException e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-        /// <summary>
-        /// Method to cancel the rate by id
-        /// </summary>
-        /// <returns>
-        /// Returns bad request in case of token not given as header or if the instance was not rated by the user with given token
-        /// Returns the modified entity in case the rate was cancelled successfully
-        /// </returns>
-        [HttpPost]
-        [ResponseType(typeof(NewsInstance))]
-        public IHttpActionResult CancelRateById(int id)
-        {
-            IEnumerable<string> values;
-            if (!Request.Headers.TryGetValues("Token", out values))
-            {
-                return BadRequest("Token was not given. Use a token that was used to rate this instance");
-            }
-            string token = values.FirstOrDefault();
-            var userRating = RatingManager.IsRateLogged(db, token, id);
-            if (userRating == null)
-            {
-                return BadRequest("User with given token has not rated the news with given id");
-            }
-            return Ok((NewsInstanceViewModel)RatingManager.CancelRate(db, userRating));
-        }
-
-        /// <summary>
         /// Method to get the news with rating greater or equal the one given as a parameter
         /// </summary>
         /// <returns>
         /// Returns JSON array with instances that fit the condition as a NewsInstanceViewModel 
         /// </returns>
 
-        [Route("api/TopNewsInstances/{minRating}")]
         [HttpGet]
-        public IHttpActionResult GetTopNewsInstances(double minRating)
+        public IHttpActionResult GetNewsInstances(double minRating)
         {
             var newsNoRatingExcluded = new List<NewsInstance>();
             foreach(var newsInstanceCandidate in db.NewsInstances)
@@ -228,9 +160,8 @@ namespace NewsFeedAPI.Contollers
         /// Returns JSON array with instances that fit the condition as a NewsInstanceViewModel 
         /// </returns>
 
-        [Route("api/NewsInstancesCategory/{category}")]
         [HttpGet]
-        public IHttpActionResult GetNewsInstancesCategory(string category)
+        public IHttpActionResult GetNewsInstances(string category)
         {
             var news = from newsInstance in db.NewsInstances
                        where newsInstance.Category == category

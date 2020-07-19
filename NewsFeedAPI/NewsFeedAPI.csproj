@@ -94,6 +94,7 @@
     <Compile Include="Config\NewsFeedAPIConfig.cs" />
     <Compile Include="Contollers\NewsInstancesController.cs" />
     <Compile Include="Contollers\UserController.cs" />
+    <Compile Include="Contollers\UserRatingController.cs" />
     <Compile Include="Data\NewsFeedAPIContext.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
