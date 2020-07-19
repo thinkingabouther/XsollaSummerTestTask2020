@@ -37,7 +37,7 @@ namespace NewsFeedAPI.Contollers
                 return BadRequest("Token was not given. Use a token that was used to rate this instance");
             }
             string token = values.FirstOrDefault();
-            var userRating = RatingManager.IsRateLogged(db, token, newsInstanceId);
+            var userRating = RatingManager.CheckRateLogged(db, token, newsInstanceId);
             if (userRating == null)
             {
                 return BadRequest("User with given token has not rated the news with given id");
@@ -60,29 +60,23 @@ namespace NewsFeedAPI.Contollers
                 return BadRequest("Token was not given. Issue a token via api/User/Token and attach it to as a header to your request");
             }
             string token = values.FirstOrDefault();
-            bool isNewsRated;
-            try
+            LoggingError loggingError;
+            RatingManager.TryLogRating(db, token, newsInstanceId, rating, out loggingError);
+            switch (loggingError)
             {
-                isNewsRated = !RatingManager.TryLogRating(db, token, newsInstanceId, rating);
-            }
-            catch (UnregistredTokenException e)
-            {
-                return BadRequest(e.Message);
-            }
-            if (isNewsRated)
-            {
-                return BadRequest("User with this token has already rated that piece of news");
-            }
-            try
-            {
-                NewsInstance newsInstance = RatingManager.RateNews(db, newsInstanceId, rating);
-                if (newsInstance == null)
-                    return NotFound();
-                return Ok((NewsInstanceViewModel)newsInstance);
-            }
-            catch (RatingOutOfBoundsException e)
-            {
-                return BadRequest(e.Message);
+                case LoggingError.UnregistredToken:
+                    return BadRequest($"Token {token} is not registred!");
+                case LoggingError.NoNewsRated:
+                    return BadRequest("User with this token has already rated that piece of news");
+                case LoggingError.RatingOutOfBounds:
+                    return BadRequest("Given rating was out of bounds. The range of rating is from 1 to 5");
+                case LoggingError.NoError:
+                    NewsInstance newsInstance = RatingManager.RateNews(db, newsInstanceId, rating);
+                    if (newsInstance == null)
+                        return NotFound();
+                    return Ok((NewsInstanceViewModel)newsInstance);
+                default:
+                    return BadRequest();
             }
         }
     }

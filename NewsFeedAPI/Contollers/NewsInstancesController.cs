@@ -46,7 +46,7 @@ namespace NewsFeedAPI.Contollers
                 news.Add((NewsInstanceViewModel)newsInstance);
             }
             var response = Request.CreateResponse(news);
-            response.Headers.Add("Count", news.Count.ToString()) ;
+            response.Headers.Add("X-Count", news.Count.ToString()) ;
             return base.ResponseMessage(response);
         }
         /// <summary>
@@ -115,7 +115,7 @@ namespace NewsFeedAPI.Contollers
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception)
             {
                 return BadRequest("Error saving entity to DB");
             }
@@ -148,7 +148,7 @@ namespace NewsFeedAPI.Contollers
                 newsViewModels.Add((NewsInstanceViewModel)newsInstance);
             }
             var response = Request.CreateResponse(newsViewModels);
-            response.Headers.Add("Count", news.Count().ToString());
+            response.Headers.Add("X-Count", news.Count().ToString());
             return base.ResponseMessage(response);
 
         }
@@ -174,7 +174,7 @@ namespace NewsFeedAPI.Contollers
                 newsViewModels.Add((NewsInstanceViewModel)newsInstance);
             }
             var response = Request.CreateResponse(newsViewModels);
-            response.Headers.Add("Count", news.Count().ToString());
+            response.Headers.Add("X-Count", news.Count().ToString());
             return base.ResponseMessage(response);
         }
 
@@ -198,7 +198,7 @@ namespace NewsFeedAPI.Contollers
                 newsViewModels.Add((NewsInstanceViewModel)newsInstance);
             }
             var response = Request.CreateResponse(newsViewModels);
-            response.Headers.Add("Count", news.Count().ToString());
+            response.Headers.Add("X-Count", news.Count().ToString());
             return base.ResponseMessage(response);
         }
 

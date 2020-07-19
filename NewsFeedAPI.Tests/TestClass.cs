@@ -65,7 +65,7 @@ namespace NewsFeedAPI.Tests
             context.NewsInstances.Add(GetNewsInstance());
             ResponseMessageResult result = (ResponseMessageResult)controller.GetNewsInstances();
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, int.Parse(result.Response.Headers.GetValues("Count").FirstOrDefault()));
+            Assert.AreEqual(2, int.Parse(result.Response.Headers.GetValues("X-Count").FirstOrDefault()));
         }
 
         [TestMethod]
@@ -186,6 +186,24 @@ namespace NewsFeedAPI.Tests
             Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
             Assert.AreEqual($"User with this token has already rated that piece of news", (result as BadRequestErrorMessageResult).Message);
         }
+        [TestMethod]
+        public void RateByID_ShouldFailRatingOutOfBounds()
+        {
+            var context = new MockNewsFeedAPIContext();
+            var newsController = new UserRatingController(context);
+            var userContoller = new UserController(context);
+            context.NewsInstances.Add(GetNewsInstance());
+            var controllerContext = new HttpControllerContext();
+            var request = new HttpRequestMessage();
+            string token = (userContoller.GetToken() as OkNegotiatedContentResult<string>).Content;
+            request.Headers.Add("Token", token);
+            controllerContext.Request = request;
+            newsController.ControllerContext = controllerContext;
+            var result = newsController.PostUserRating(1, 10);
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
+            Assert.AreEqual($"Given rating was out of bounds. The range of rating is from 1 to 5", (result as BadRequestErrorMessageResult).Message);
+        }
 
         [TestMethod]
         public void RateByID_ShouldSuccess()
@@ -285,7 +303,7 @@ namespace NewsFeedAPI.Tests
             context.NewsInstances.Add(GetNewsInstance());
             ResponseMessageResult result = (ResponseMessageResult)controller.GetNewsInstances(3);
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, int.Parse(result.Response.Headers.GetValues("Count").FirstOrDefault()));
+            Assert.AreEqual(2, int.Parse(result.Response.Headers.GetValues("X-Count").FirstOrDefault()));
         }
 
         [TestMethod]
@@ -313,7 +331,7 @@ namespace NewsFeedAPI.Tests
             context.NewsInstances.Add(GetNewsInstance());
             ResponseMessageResult result = (ResponseMessageResult)controller.GetNewsInstances("SomeCategory");
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, int.Parse(result.Response.Headers.GetValues("Count").FirstOrDefault()));
+            Assert.AreEqual(2, int.Parse(result.Response.Headers.GetValues("X-Count").FirstOrDefault()));
         }
     }
 }

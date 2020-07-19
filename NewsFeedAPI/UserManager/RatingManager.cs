@@ -9,8 +9,20 @@ using System.Data;
 
 namespace NewsFeedAPI.UserManager
 {
+    public enum LoggingError
+    {
+        NoError,
+        NoNewsRated,
+        UnregistredToken,
+        RatingOutOfBounds,
+        SavingError
+    }
+
     public class RatingManager
     {
+        private static int minRating = 1;
+        private static int maxRating = 5;
+
         /// <summary>
         /// Method to log an information about a rate given by a user with given token
         /// </summary>
@@ -19,31 +31,41 @@ namespace NewsFeedAPI.UserManager
         /// </returns>
         /// <exception cref="UnregistredTokenException">Thrown in case given token was not issued by the system </exception>
         /// <exception cref="RatingOutOfBoundsException">Thrown in case given rate does not fit the range attribute for the property </exception>
-        public static bool TryLogRating(INewsFeedAPIContext db, string token, int id, int rating)
+        public static void TryLogRating(INewsFeedAPIContext db, string token, int id, int rating, out LoggingError loggingError)
         {
-                if ((from userRate in db.UserRates where userRate.Token == token select userRate.Token).Count() < 1) 
-                    throw new UnregistredTokenException($"Token {token} is not registred!");
-                var currentUserRates = from userRate in db.UserRates
-                                       where userRate.Token == token
-                                       select userRate;
-                var currentRatedNews = from userRate in currentUserRates
-                                       where userRate.NewsInstanceID == id
-                                       select userRate;
-                if (currentRatedNews.Count() > 0)
-                {
-                    return false;
-                }
-                db.UserRates.Add(new UserRate { Token = token, NewsInstanceID = id, Rating = rating });
-                try
-                {
-                    db.SaveChanges();
-                }
-                catch (DBConcurrencyException)
-                {
-                    throw new RatingOutOfBoundsException("Rating has to fit in the bounds declared with the entity property");
-                }
-                return true;
+            var ratesWithGivenToken = from userRate in db.UserRates 
+                                      where userRate.Token == token 
+                                      select userRate;
+            if (rating < minRating || rating > maxRating)
+            {
+                loggingError = LoggingError.RatingOutOfBounds;
+                return;
             }
+            if (ratesWithGivenToken.Count() < 1)
+            {
+                loggingError = LoggingError.UnregistredToken;
+                return;
+            }
+            var newsRatedWithGivenToken = from userRate in ratesWithGivenToken
+                                          where userRate.NewsInstanceID == id
+                                          select userRate;
+            if (newsRatedWithGivenToken.Count() > 0)
+            {
+                loggingError = LoggingError.NoNewsRated;
+                return;
+            }
+            db.UserRates.Add(new UserRate { Token = token, NewsInstanceID = id, Rating = rating });
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DBConcurrencyException)
+            {
+                loggingError = LoggingError.SavingError;
+                return;
+            }
+            loggingError = LoggingError.NoError;
+        }
 
         /// <summary>
         /// Method to add given rating to an instance with given id
@@ -70,7 +92,7 @@ namespace NewsFeedAPI.UserManager
         /// <returns>
         /// Returns UserRate instance if there is one. Returns null if the user hasn't rated the instance
         /// </returns>v
-        public static UserRate IsRateLogged(INewsFeedAPIContext db, string token, int id)
+        public static UserRate CheckRateLogged(INewsFeedAPIContext db, string token, int id)
         {
             var currentUserRates = from userRate in db.UserRates
                                     where userRate.Token == token
@@ -97,21 +119,5 @@ namespace NewsFeedAPI.UserManager
             db.SaveChanges();
             return currentNewsInstance;
         }   
-    }
-
-    public class UnregistredTokenException : Exception
-    {
-        public UnregistredTokenException(string message) : base(message)
-        {
-
-        }
-    }
-
-    public class RatingOutOfBoundsException : Exception
-    {
-        public RatingOutOfBoundsException(string message) : base(message)
-        {
-
-        }
     }
 }
