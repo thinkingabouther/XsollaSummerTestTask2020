@@ -178,6 +178,30 @@ namespace NewsFeedAPI.Contollers
             return base.ResponseMessage(response);
         }
 
+        [HttpGet]
+        public IHttpActionResult GetNewsInstances(string category, double minRating)
+        {
+            var newsNoRatingExcluded = new List<NewsInstance>();
+            foreach (var newsInstanceCandidate in db.NewsInstances)
+            {
+                if (newsInstanceCandidate.RateCount != 0) newsNoRatingExcluded.Add(newsInstanceCandidate);
+            }
+            var news = from newsInstance in newsNoRatingExcluded
+                       where newsInstance.Category == category &&
+                             newsInstance.RateSum / (double)newsInstance.RateCount >= minRating
+                       select newsInstance;
+            if (news.Count() < 1)
+                return NotFound();
+            var newsViewModels = new List<NewsInstanceViewModel>();
+            foreach (var newsInstance in news)
+            {
+                newsViewModels.Add((NewsInstanceViewModel)newsInstance);
+            }
+            var response = Request.CreateResponse(newsViewModels);
+            response.Headers.Add("Count", news.Count().ToString());
+            return base.ResponseMessage(response);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
