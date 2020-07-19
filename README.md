@@ -15,4 +15,4 @@ This is a simple news feed server API. It allows you to add and edit your news, 
 ## Usage
 API is hosted on the following URL: https://newsfeedapi20200717025549.azurewebsites.net
 
-Refer to [OpenAPI specification](app.swaggerhub.com/apis-docs/thinkingabouther/NewsFeedAPI/0.1) to see all the available requests 
+Refer to [OpenAPI specification](https://app.swaggerhub.com/apis-docs/thinkingabouther/NewsFeedAPI/0.1) to see all the available requests 
